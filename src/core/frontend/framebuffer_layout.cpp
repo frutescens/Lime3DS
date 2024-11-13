@@ -442,7 +442,27 @@ FramebufferLayout FrameLayoutFromResolutionScale(u32 res_scale, bool is_secondar
             return LargeFrameLayout(width, height, Settings::values.swap_screen.GetValue(),
                                     Settings::values.upright_screen.GetValue(), 1,
                                     Settings::SmallScreenPosition::MiddleRight);
-
+        case Settings::LayoutOption::HybridScreen:
+            additional_width = 0;
+            if (Core::additional_screen_enabled) {
+                additional_width = Math.abs(Core::additional_screen::left - Core::additional_screen::right);
+            }
+            const bool is_swapped = Settings::value.swap_screen.GetValue();
+            if (is_swapped) {
+                width = (Core::kScreenBottomWidth + additional_width) * res_scale;
+                height = Core::kScreenBottomHeight * res_scale;
+            }
+            else {
+               width = (Core::kScreenTopWidth + additional_width) * res_scale;
+               height = Core::kScreenTopHeight * res_scale;
+            }
+            const bool is_upright = Settings::value.upright_screen.GetValue();
+            if (is_upright) {
+                std::swap(width, height);
+            }
+            return LargeFrameLayout(width, height, is_swapped, is_upright,
+                Settings::values.large_screen_proportion.GetValue(),
+                Settings::values.small_screen_position.GetValue())
         case Settings::LayoutOption::Default:
         default:
             width = Core::kScreenTopWidth * res_scale;
